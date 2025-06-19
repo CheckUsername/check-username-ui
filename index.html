@@ -1,48 +1,132 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Check Username Availability</title>
-  <!-- Font Awesome Kit for full icon support -->
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <title>Check Username</title>
+  
+  <!-- Font Awesome CDN (يعمل على GitHub Pages) -->
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-1ycn6IcaQQ40/MKB4Imkb9sQGpGvFvZ8Qz1D1e3I2+EJq6x38LFd35zF4YIYqQX2Q0N7kP1z7+bc1IY5V5V5Fw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
   <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; color: #333; margin: 0; padding: 0; }
-    .container { max-width: 500px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h1 { text-align: center; margin-bottom: 1rem; }
-    .input-group { display: flex; gap: 0.5rem; }
-    input { flex-grow: 1; padding: 0.75rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px; }
-    button { padding: 0.75rem 1rem; font-size: 1rem; border: none; background: #007bff; color: #fff; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #0056b3; }
-    ul { list-style: none; padding: 0; margin-top: 1rem; }
-    li { display: flex; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
-    li:last-child { border-bottom: none; }
-    li i.platform { width: 24px; margin-right: 0.75rem; font-size: 1.2rem; }
-    .available { color: #28a745; }
-    .taken { color: #dc3545; }
-    .error { color: #ffc107; }
-    @media (max-width: 600px) { .container { margin: 1rem; padding: 1rem; } input, button { font-size: 0.9rem; } }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    input {
+      flex-grow: 1;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: none;
+      background: #007bff;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 1.5rem;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    li:last-child {
+      border-bottom: none;
+    }
+
+    li i.platform {
+      width: 30px;
+      font-size: 1.3rem;
+      margin-right: 0.5rem;
+    }
+
+    .available {
+      color: #28a745;
+    }
+
+    .taken {
+      color: #dc3545;
+    }
+
+    .error {
+      color: #ffc107;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1><i class="fas fa-user-check"></i> Check Username</h1>
     <div class="input-group">
-      <input id="username" type="text" placeholder="Enter a username (e.g., john_doe)" />
+      <input id="username" type="text" placeholder="Enter username (e.g., johndoe)" />
       <button onclick="checkUsername()"><i class="fas fa-search"></i></button>
     </div>
     <ul id="results"></ul>
-  </div>  <script>
+  </div>
+
+  <script>
     const workerUrl = 'https://check-username.checkusername.workers.dev/';
+
     const icons = {
       Instagram: 'fab fa-instagram',
-      YouTube:   'fab fa-youtube',
-      TikTok:    'fab fa-tiktok',
-      Reddit:    'fab fa-reddit',
+      YouTube: 'fab fa-youtube',
+      TikTok: 'fab fa-tiktok',
+      Reddit: 'fab fa-reddit',
       Pinterest: 'fab fa-pinterest',
-      Twitch:    'fab fa-twitch',
-      Tumblr:    'fab fa-tumblr',
-      LinkedIn:  'fab fa-linkedin',
-      X:         'fab fa-xmark'
+      Twitch: 'fab fa-twitch',
+      Tumblr: 'fab fa-tumblr',
+      LinkedIn: 'fab fa-linkedin',
+      X: 'fab fa-x-twitter'
     };
 
     async function checkUsername() {
@@ -52,6 +136,7 @@
         resultsList.innerHTML = '<li class="error"><i class="fas fa-exclamation-circle"></i> Please enter a username.</li>';
         return;
       }
+
       resultsList.innerHTML = '<li><i class="fas fa-spinner fa-spin"></i> Checking...</li>';
 
       try {
@@ -60,6 +145,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username })
         });
+
         const data = await response.json();
 
         resultsList.innerHTML = Object.entries(data).map(([platform, available]) => {
@@ -80,9 +166,11 @@
           const platformIcon = icons[platform] || 'fas fa-user';
           return `<li><i class="platform ${platformIcon}"></i> ${platform}: <span class="${statusClass}">${label}</span> ${statusIcon}</li>`;
         }).join('');
+
       } catch (e) {
-        resultsList.innerHTML = '<li class="error"><i class="fas fa-exclamation-triangle"></i> Network Error</li>';
+        resultsList.innerHTML = '<li class="error"><i class="fas fa-exclamation-triangle"></i> Error checking username.</li>';
       }
     }
-  </script></body>
+  </script>
+</body>
 </html>
