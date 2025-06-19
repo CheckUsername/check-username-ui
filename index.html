@@ -10,13 +10,9 @@
     input{padding:.5rem;width:90%;max-width:300px;margin-right:.5rem}
     button{padding:.5rem 1rem;background:#007bff;color:#fff;border:none;cursor:pointer}
     ul{list-style:none;padding:0;margin-top:1rem}
-    li{background:#fff;margin:.5rem auto;padding:.5rem 1rem;
-       border-radius:5px;max-width:400px;display:flex;
-       justify-content:space-between;align-items:center}
+    li{background:#fff;margin:.5rem auto;padding:.5rem 1rem;border-radius:5px;max-width:400px;display:flex;justify-content:space-between;align-items:center}
     .status{font-weight:bold}
-    .available{color:green}
-    .taken{color:red}
-    .error{color:orange}
+    .available{color:green}.taken{color:red}.error{color:orange}
   </style>
 </head>
 <body>
@@ -26,11 +22,8 @@
   <ul id="results"></ul>
 
   <script>
-    const platforms = [
-      "Instagram","TikTok","YouTube","Twitter",
-      "Pinterest","Reddit","Twitch","Tumblr","LinkedIn"
-    ];
-    const api = "https://check-username.checkusername.workers.dev"; // رابــط الـ Worker
+    const platforms = ["Instagram","TikTok","YouTube","Twitter","Pinterest","Reddit","Twitch","Tumblr","LinkedIn"];
+    const api = "https://check-username.checkusername.workers.dev";
 
     async function checkUsername() {
       const u = document.getElementById("username").value.trim();
@@ -38,24 +31,17 @@
       const out = document.getElementById("results");
       out.innerHTML = "<li class='error'>Checking...</li>";
 
-      // إرسال طلبات GET لجميع المنصات
-      const tasks = platforms.map(platform =>
-        fetch(`${api}?platform=${encodeURIComponent(platform)}&username=${encodeURIComponent(u)}`)
-          .then(res => {
-            if (!res.ok) throw new Error(res.status);
-            return res.json();
-          })
-          .then(({ available }) =>
-            `<li><span>${platform}:</span>
-             <span class="status ${available?'available':'taken'}">
-               ${available?'✅ Available':'❌ Taken'}
-             </span></li>`
-          )
-          .catch(() =>
-            `<li><span>${platform}:</span>
-             <span class="status error">⚠️ Error</span></li>`
-          )
-      );
+      const tasks = platforms.map(platform => fetch(
+        `${api}/?platform=${encodeURIComponent(platform)}&username=${encodeURIComponent(u)}`
+      ).then(res => {
+        if (!res.ok) throw new Error(res.status);
+        return res.json();
+      }).then(data => {
+        const av = data.available;
+        return `<li><span>${platform}:</span> <span class="status ${av?'available':'taken'}">${av?'✅ Available':'❌ Taken'}</span></li>`;
+      }).catch(() =>
+        `<li><span>${platform}:</span> <span class="status error">⚠️ Error</span></li>`
+      ));
 
       out.innerHTML = (await Promise.all(tasks)).join("");
     }
