@@ -1,33 +1,55 @@
-<script>
-  const platforms = [
-    "Instagram", "TikTok", "YouTube", "Twitter",
-    "Pinterest", "Reddit", "Twitch", "Tumblr", "LinkedIn"
-  ];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Check Username Availability</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f7fa; text-align: center; padding: 2rem; }
+    h1 { color: #333; }
+    input { padding: .5rem; width: 90%; max-width: 300px; margin-right: .5rem; }
+    button { padding: .5rem 1rem; background: #007bff; color: #fff; border: none; cursor: pointer; }
+    ul { list-style: none; padding: 0; margin-top: 1rem; }
+    li { background: #fff; margin: .5rem auto; padding: .5rem 1rem; border-radius: 5px; max-width: 400px;
+         display: flex; justify-content: space-between; align-items: center; }
+    .status { font-weight: bold; }
+    .available { color: green; } .taken { color: red; } .error { color: orange; }
+  </style>
+</head>
+<body>
+  <h1>Check Username Availability</h1>
+  <input id="username" placeholder="Enter username" />
+  <button onclick="checkUsername()">🔍 Check</button>
+  <ul id="results"></ul>
 
-  const api = "https://check-username.checkusername.workers.dev";
+  <script>
+    const platforms = ["Instagram","TikTok","YouTube","Twitter","Pinterest","Reddit","Twitch","Tumblr","LinkedIn"];
+    const api = "https://check-username.checkusername.workers.dev"; // رابط الـ Worker
 
-  async function checkUsername() {
-    const username = document.getElementById("username").value.trim();
-    if (!username) return;
+    async function checkUsername() {
+      const username = document.getElementById("username").value.trim();
+      if (!username) return;
+      const results = document.getElementById("results");
+      results.innerHTML = "<li class='error'>Checking...</li>";
 
-    const results = document.getElementById("results");
-    results.innerHTML = "<li>Checking...</li>";
+      const checks = platforms.map(platform => (async () => {
+        try {
+          const res = await fetch(api, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ platform, username })
+          });
+          if (!res.ok) throw new Error(res.status);
+          const { available } = await res.json();
+          return `<li><span>${platform}:</span> <span class="status ${available?'available':'taken'}">${available?'✅ Available':'❌ Taken'}</span></li>`;
+        } catch {
+          return `<li><span>${platform}:</span> <span class="status error">⚠️ Error</span></li>`;
+        }
+      })());
 
-    const checks = platforms.map(async (platform) => {
-      try {
-        const res = await fetch(`${api}/?platform=${platform}&username=${username}`, {
-          method: "GET",
-        });
-        if (!res.ok) throw new Error("API Error");
-        const data = await res.json();
-        const available = data.available;
-        return `<li><span>${platform}:</span> <span class="status ${available ? 'available' : 'taken'}">${available ? '✅ Available' : '❌ Taken'}</span></li>`;
-      } catch (e) {
-        return `<li><span>${platform}:</span> <span class="status">⚠️ Error</span></li>`;
-      }
-    });
-
-    const allResults = await Promise.all(checks);
-    results.innerHTML = allResults.join("");
-  }
-</script>
+      const all = await Promise.all(checks);
+      results.innerHTML = all.join("");
+    }
+  </script>
+</body>
+</html>
