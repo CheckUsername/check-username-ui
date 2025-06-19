@@ -67,17 +67,18 @@
       "LinkedIn"
     ];
 
+    const api = "https://check-username.checkusername.workers.dev"; // رابط Cloudflare Worker الخاص بك
+
     async function checkUsername() {
       const username = document.getElementById("username").value.trim();
       if (!username) return;
       const results = document.getElementById("results");
       results.innerHTML = "<li>Checking...</li>";
 
-      const api = "https://check-username.checkusername.workers.dev"; // رابط الـ Worker
-
       const checks = platforms.map(async (platform) => {
         try {
           const res = await fetch(`${api}/?platform=${platform}&username=${username}`);
+          if (!res.ok) throw new Error("Fetch error");
           const data = await res.json();
           const available = data.available;
           return `<li><span>${platform}:</span> <span class="status ${available ? 'available' : 'taken'}">${available ? '✅ Available' : '❌ Taken'}</span></li>`;
