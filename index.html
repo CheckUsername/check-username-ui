@@ -2,174 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Check Username</title>
-  
-  <!-- Font Awesome CDN (يعمل على GitHub Pages) -->
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    integrity="sha512-1ycn6IcaQQ40/MKB4Imkb9sQGpGvFvZ8Qz1D1e3I2+EJq6x38LFd35zF4YIYqQX2Q0N7kP1z7+bc1IY5V5V5Fw=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Check Username Availability</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
-
-    .container {
-      max-width: 500px;
-      margin: 2rem auto;
-      background: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
+      background: #f5f7fa;
       text-align: center;
-      margin-bottom: 1rem;
+      padding: 2rem;
     }
-
-    .input-group {
-      display: flex;
-      gap: 0.5rem;
+    h1 {
+      color: #333;
     }
-
     input {
-      flex-grow: 1;
-      padding: 0.75rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      padding: 0.5rem;
+      width: 300px;
+      max-width: 90%;
+      margin-right: 10px;
     }
-
     button {
-      padding: 0.75rem 1rem;
-      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #007bff;
+      color: white;
       border: none;
-      background: #007bff;
-      color: #fff;
-      border-radius: 4px;
       cursor: pointer;
     }
-
-    button:hover {
-      background: #0056b3;
-    }
-
     ul {
-      list-style: none;
+      list-style-type: none;
       padding: 0;
-      margin-top: 1.5rem;
     }
-
     li {
+      background: white;
+      margin: 0.5rem auto;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      max-width: 400px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #eee;
     }
-
-    li:last-child {
-      border-bottom: none;
+    .status {
+      font-weight: bold;
     }
-
-    li i.platform {
-      width: 30px;
-      font-size: 1.3rem;
-      margin-right: 0.5rem;
-    }
-
-    .available {
-      color: #28a745;
-    }
-
-    .taken {
-      color: #dc3545;
-    }
-
-    .error {
-      color: #ffc107;
-    }
-
-    @media (max-width: 600px) {
-      .container {
-        margin: 1rem;
-        padding: 1rem;
-      }
-    }
+    .available { color: green; }
+    .taken { color: red; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1><i class="fas fa-user-check"></i> Check Username</h1>
-    <div class="input-group">
-      <input id="username" type="text" placeholder="Enter username (e.g., johndoe)" />
-      <button onclick="checkUsername()"><i class="fas fa-search"></i></button>
-    </div>
-    <ul id="results"></ul>
-  </div>
+  <h1>Check Username Availability</h1>
+  <input type="text" id="username" placeholder="Enter username" />
+  <button onclick="checkUsername()">🔍 Check</button>
+  <ul id="results"></ul>
 
   <script>
-    const workerUrl = 'https://check-username.checkusername.workers.dev/';
-
-    const icons = {
-      Instagram: 'fab fa-instagram',
-      YouTube: 'fab fa-youtube',
-      TikTok: 'fab fa-tiktok',
-      Reddit: 'fab fa-reddit',
-      Pinterest: 'fab fa-pinterest',
-      Twitch: 'fab fa-twitch',
-      Tumblr: 'fab fa-tumblr',
-      LinkedIn: 'fab fa-linkedin',
-      X: 'fab fa-x-twitter'
-    };
+    const platforms = [
+      "Instagram",
+      "TikTok",
+      "YouTube",
+      "Twitter",
+      "Pinterest",
+      "Reddit",
+      "Twitch",
+      "Tumblr",
+      "LinkedIn"
+    ];
 
     async function checkUsername() {
-      const username = document.getElementById('username').value.trim();
-      const resultsList = document.getElementById('results');
-      if (!username) {
-        resultsList.innerHTML = '<li class="error"><i class="fas fa-exclamation-circle"></i> Please enter a username.</li>';
-        return;
-      }
+      const username = document.getElementById("username").value.trim();
+      if (!username) return;
+      const results = document.getElementById("results");
+      results.innerHTML = "<li>Checking...</li>";
 
-      resultsList.innerHTML = '<li><i class="fas fa-spinner fa-spin"></i> Checking...</li>';
+      const api = "https://check-username.checkusername.workers.dev"; // رابط الـ Worker
 
-      try {
-        const response = await fetch(workerUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username })
-        });
+      const checks = platforms.map(async (platform) => {
+        try {
+          const res = await fetch(`${api}/?platform=${platform}&username=${username}`);
+          const data = await res.json();
+          const available = data.available;
+          return `<li><span>${platform}:</span> <span class="status ${available ? 'available' : 'taken'}">${available ? '✅ Available' : '❌ Taken'}</span></li>`;
+        } catch (e) {
+          return `<li><span>${platform}:</span> <span class="status">⚠️ Error</span></li>`;
+        }
+      });
 
-        const data = await response.json();
-
-        resultsList.innerHTML = Object.entries(data).map(([platform, available]) => {
-          let statusIcon = '<i class="fas fa-question-circle error"></i>';
-          let statusClass = 'error';
-          let label = 'Error';
-
-          if (available === true) {
-            statusIcon = '<i class="fas fa-check-circle available"></i>';
-            statusClass = 'available';
-            label = 'Available';
-          } else if (available === false) {
-            statusIcon = '<i class="fas fa-times-circle taken"></i>';
-            statusClass = 'taken';
-            label = 'Taken';
-          }
-
-          const platformIcon = icons[platform] || 'fas fa-user';
-          return `<li><i class="platform ${platformIcon}"></i> ${platform}: <span class="${statusClass}">${label}</span> ${statusIcon}</li>`;
-        }).join('');
-
-      } catch (e) {
-        resultsList.innerHTML = '<li class="error"><i class="fas fa-exclamation-triangle"></i> Error checking username.</li>';
-      }
+      const allResults = await Promise.all(checks);
+      results.innerHTML = allResults.join("");
     }
   </script>
 </body>
